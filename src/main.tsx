@@ -26,6 +26,8 @@ const Profile = lazy(() => import("./pages/Profile.tsx"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard.tsx"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers.tsx"));
 const AdminChallenges = lazy(() => import("./pages/AdminChallenges.tsx"));
+const SubmitIdea = lazy(() => import("./pages/SubmitIdea.tsx"));
+const OrgIdeas = lazy(() => import("./pages/OrgIdeas.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -171,6 +173,10 @@ createRoot(document.getElementById("root")!).render(
               />
               <Route path="/challenges" element={<Challenges />} />
               <Route path="/challenges/:id" element={<ChallengeDetail />} />
+              <Route
+                path="/challenges/:id/idea"
+                element={dashboard(<SubmitIdea />)}
+              />
               <Route path="/showcase" element={<Showcase />} />
               <Route
                 path="/onboarding"
@@ -182,6 +188,7 @@ createRoot(document.getElementById("root")!).render(
               />
               <Route path="/dashboard" element={dashboard(<Dashboard />)} />
               <Route path="/post-challenge" element={dashboard(<PostChallenge />)} />
+              <Route path="/org/ideas" element={dashboard(<OrgIdeas />)} />
               <Route path="/profile" element={dashboard(<Profile />)} />
               <Route
                 path="/admin"

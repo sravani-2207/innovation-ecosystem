@@ -120,6 +120,30 @@ const schema = defineSchema(
       .index("by_challenge", ["challengeId"])
       .index("by_user", ["userId"]),
 
+    /** Idea submitted by a student (or team) for a challenge. */
+    ideas: defineTable({
+      challengeId: v.id("challenges"),
+      studentUserId: v.id("users"),
+      studentName: v.string(),
+      title: v.string(),
+      description: v.string(),
+      technologies: v.array(v.string()),
+      fileName: v.optional(v.string()),
+      fileType: v.optional(v.string()),
+      analysis: v.optional(
+        v.object({
+          problemUnderstanding: v.string(),
+          strengths: v.array(v.string()),
+          missing: v.array(v.string()),
+          suggestions: v.array(v.string()),
+          expectedImpact: v.string(),
+          analyzedAt: v.number(),
+        }),
+      ),
+    })
+      .index("by_challenge", ["challengeId"])
+      .index("by_student", ["studentUserId"]),
+
     /** One-off system markers (e.g. "demo data seeded"). */
     meta: defineTable({
       key: v.string(),

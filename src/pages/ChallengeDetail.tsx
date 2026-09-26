@@ -16,6 +16,7 @@ import {
   Building2,
   CalendarDays,
   CheckCircle2,
+  Lightbulb,
   MapPin,
   Target,
   Users,
@@ -39,6 +40,10 @@ export default function ChallengeDetail() {
   const participants = useQuery(
     api.challenges.listParticipants,
     id ? { id: id as never } : "skip",
+  );
+  const myIdea = useQuery(
+    api.ideas.getMineForChallenge,
+    id ? { challengeId: id as never } : "skip",
   );
 
   if (challenge === undefined) {
@@ -259,7 +264,7 @@ export default function ChallengeDetail() {
                 {joined && (
                   <div className="flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2 text-sm font-medium text-success">
                     <CheckCircle2 className="size-4" />
-                    You joined this challenge
+                    Joined
                   </div>
                 )}
                 <JoinChallengeButton
@@ -269,8 +274,22 @@ export default function ChallengeDetail() {
                   reason={reason}
                 />
                 {joined && (
-                  <Button variant="secondary" className="w-full" disabled>
-                    Team formation — coming in v2
+                  <Button
+                    variant={myIdea ? "outline" : "default"}
+                    className="w-full gap-2"
+                    onClick={() => navigate(`/challenges/${challenge._id}/idea`) }
+                  >
+                    {myIdea ? (
+                      <>
+                        <Lightbulb className="size-4" />
+                        Idea submitted — view & improve
+                      </>
+                    ) : (
+                      <>
+                        <Lightbulb className="size-4" />
+                        Submit Idea
+                      </>
+                    )}
                   </Button>
                 )}
               </CardContent>

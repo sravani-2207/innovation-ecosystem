@@ -10,6 +10,7 @@ import {
   Compass,
   LayoutDashboard,
   LayoutList,
+  Lightbulb,
   LogOut,
   Menu,
   ShieldCheck,
@@ -30,8 +31,9 @@ const NAV = {
   ],
   organization: [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/post-challenge", label: "Publish a challenge", icon: Building2 },
-    { to: "/challenges", label: "Catalog", icon: Compass },
+    { to: "/post-challenge", label: "Publish Challenge", icon: Building2 },
+    { to: "/challenges", label: "Manage Challenges", icon: Compass },
+    { to: "/org/ideas", label: "Review Ideas", icon: Lightbulb },
     { to: "/profile", label: "Profile", icon: User },
   ],
   admin: [

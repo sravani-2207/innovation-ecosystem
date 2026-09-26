@@ -1,15 +1,18 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { AIPanel } from "@/components/AIPanel";
 import { ChallengeStatus, DifficultyBadge } from "@/components/badges";
 import { EmptyState } from "@/components/states";
 import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "convex/react";
 import {
   Building2,
   Compass,
+  Lightbulb,
   Plus,
   Sparkles,
 } from "lucide-react";
@@ -116,7 +119,11 @@ function StudentDashboard({ name }: { name?: string }) {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {joined.map(({ challenge, match }) => (
-              <ChallengeCard key={challenge._id} challenge={challenge} match={match} />
+              <JoinedChallengeCard
+                key={challenge._id}
+                challenge={challenge}
+                matchScore={match.score}
+              />
             ))}
           </div>
         )}
@@ -271,8 +278,81 @@ function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <Card className="border-border/80">
       <CardContent className="p-5">
-        <p className="text-2xl font-bold tabular-nums">{value}</p>
+        <p className="text-2xl font-semibold tabular-nums">{value}</p>
         <p className="mt-0.5 text-sm text-muted-foreground">{label}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Joined challenge card with the idea status wired to the submission flow. */
+function JoinedChallengeCard({
+  challenge,
+  matchScore,
+}: {
+  challenge: Doc<"challenges">;
+  matchScore: number;
+}) {
+  const navigate = useNavigate();
+  const idea = useQuery(api.ideas.getMineForChallenge, {
+    challengeId: challenge._id,
+  });
+
+  return (
+    <Card className="soft-shadow flex h-full flex-col border-border/80 p-0">
+      <CardContent className="flex flex-1 flex-col gap-3 p-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge
+            variant="outline"
+            className="border-success/30 bg-success/10 font-medium text-success"
+          >
+            Joined
+          </Badge>
+          <Badge variant="outline" className="border-border bg-muted/60 font-normal text-muted-foreground">
+            {challenge.domain}
+          </Badge>
+          <span className="ml-auto text-sm font-semibold text-primary tabular-nums">
+            {matchScore}%
+          </span>
+        </div>
+        <Link
+          to={`/challenges/${challenge._id}`}
+          className="line-clamp-2 text-[15px] leading-snug font-semibold hover:text-primary"
+        >
+          {challenge.title}
+        </Link>
+        <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+          {challenge.problemStatement}
+        </p>
+        <div className="mt-auto space-y-2 pt-1">
+          {idea === undefined ? null : idea === null ? (
+            <Button
+              className="w-full gap-2"
+              size="sm"
+              onClick={() => navigate(`/challenges/${challenge._id}/idea`)}
+            >
+              <Lightbulb className="size-3.5" />
+              Submit Idea
+            </Button>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <Badge
+                variant="outline"
+                className="border-primary/25 bg-accent font-medium text-accent-foreground"
+              >
+                <Lightbulb className="mr-1 size-3" />
+                {idea.analysis ? "Idea analyzed" : "Idea submitted"}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/challenges/${challenge._id}/idea`)}
+              >
+                Open
+              </Button>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
