@@ -1,0 +1,17 @@
+{
+  "name": "Udbhava",
+  "short_name": "Udbhava",
+  "description": "Where Problems Become Possibilities — connecting real-world challenges with student innovators.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFDF9",
+  "theme_color": "#C65A1E",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
