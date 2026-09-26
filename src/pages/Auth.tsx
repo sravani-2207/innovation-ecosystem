@@ -98,27 +98,28 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
             <div className="mb-6 flex items-center gap-3">
               <UdbhavaMark className="size-12" />
               <div>
-                <p className="text-xl font-bold tracking-[0.16em]">UDBHAVA</p>
+                <p className="text-xl font-semibold lowercase tracking-[0.2em]">
+                  udbhava
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Where Problems Become Possibilities.
+                  from emergence to existence
                 </p>
               </div>
             </div>
             <ul className="space-y-3 text-sm leading-6 text-muted-foreground">
               <li className="flex items-start gap-2">
                 <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                Organizations publish real-world challenges — AI structures them
-                into sub-problems and skills.
+                Publish a problem in plain language — the analyzer gives it
+                structure, skills and sub-problems.
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                Students get a personalized match score for every open
+                Browse the catalog with a personal match score on every open
                 challenge.
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                One continuous journey: discover → join → build → evaluate →
-                showcase.
+                One continuous record, from first draft to delivered solution.
               </li>
             </ul>
           </div>
@@ -131,9 +132,9 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                   <div className="mb-2 flex justify-center lg:hidden">
                     <UdbhavaMark className="size-12" />
                   </div>
-                  <CardTitle className="text-xl">Welcome to Udbhava</CardTitle>
+                  <CardTitle className="text-xl">Welcome back</CardTitle>
                   <CardDescription>
-                    Enter your email to log in or sign up
+                    Enter your email to log in or create your account
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleEmailSubmit}>

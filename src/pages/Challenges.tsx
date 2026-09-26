@@ -24,23 +24,27 @@ import { useNavigate } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import type { Doc } from "@/convex/_generated/dataModel";
 
-/** One-time AI demo seed so the feed is never empty on a fresh deployment. */
+/**
+ * One-time demo seed. Because this deployment is for our own team, the sample
+ * problems are only generated while nobody has signed in yet — so real
+ * members never receive invented content.
+ */
 function DemoSeed() {
-  const seeded = useQuery(api.meta.isSeeded, {});
+  const { isAuthenticated } = useAuth();
+  const seeded = useQuery(api.meta.isSeeded, isAuthenticated ? "skip" : {});
   const seed = useMutation(api.meta.seedDemo);
   useEffect(() => {
-    if (seeded === false) {
-      seed().catch(() => {
-        // Seeding is best-effort; the feed works fine without it.
-      });
-    }
-  }, [seeded, seed]);
+    if (isAuthenticated || seeded !== false) return;
+    seed().catch(() => {
+      // Seeding is best-effort; the catalog works fine without it.
+    });
+  }, [isAuthenticated, seeded, seed]);
   return null;
 }
 
 export default function Challenges() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, role, isAuthenticated } = useAuth();
   const challenges = useChallenges();
   const recommended = useRecommended();
 
@@ -53,7 +57,7 @@ export default function Challenges() {
   const hasRecs = recommended.length > 0;
   const showRecommended = hasRecs && !userToggledRecs;
 
-  const student = user?.role === "student";
+  const student = user?.role === "student" || role === "student";
   const loading = challenges === undefined;
 
   const filtered = useMemo(() => {
@@ -78,17 +82,17 @@ export default function Challenges() {
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 md:py-10">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              Challenge Discovery
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Catalog
             </h1>
             <p className="mt-1.5 text-muted-foreground">
-              Real-world problems published by organizations and universities —
-              open for student teams.
+              Every problem published inside the workspace — open challenges
+              carry your personal match score.
             </p>
           </div>
-          {isAuthenticated && user?.role === "organization" && (
+          {isAuthenticated && (role === "organization" || user?.role === "organization") && (
             <Button onClick={() => navigate("/post-challenge")}>
-              Post a Challenge
+              Publish a challenge
             </Button>
           )}
         </div>
@@ -103,14 +107,14 @@ export default function Challenges() {
             >
               <span className="flex items-center gap-2 text-sm font-semibold text-accent-foreground">
                 <Sparkles className="size-4 text-primary" />
-                {showRecommended ? "Hide" : "Show"} AI recommendations for you
+                {showRecommended ? "Hide" : "Show"} challenges picked for you
               </span>
               <Badge variant="secondary" className="bg-primary/15 text-primary">
                 {recommended.length} match{recommended.length === 1 ? "" : "es"}
               </Badge>
             </button>
             {showRecommended && (
-              <AIPanel title="Recommended for you" className="mb-6">
+              <AIPanel title="Picked for you" className="mb-6">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {recommended.slice(0, 3).map(({ challenge, match }) => (
                     <ChallengeCard key={challenge._id} challenge={challenge} match={match} />
@@ -167,9 +171,9 @@ export default function Challenges() {
             />
           ) : (
             <EmptyState
-              title="No challenges published yet"
-              description="Organizations are preparing real-world problems. As a student, complete your profile so Udbhava AI can match you the moment they go live."
-              actionLabel={isAuthenticated ? "Complete profile" : "Get started"}
+              title="The catalog is empty"
+              description="No challenges have been published yet. Once one goes live it will appear here with your match score."
+              actionLabel={isAuthenticated ? "Complete your profile" : "Create account"}
               actionTo={isAuthenticated ? "/profile" : "/auth?mode=register"}
             />
           )

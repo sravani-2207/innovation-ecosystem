@@ -25,7 +25,7 @@ import { useNavigate, useParams } from "react-router";
 export default function ChallengeDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
 
   const challenge = useQuery(
     api.challenges.getPublic,
@@ -62,8 +62,8 @@ export default function ChallengeDetail() {
         <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
           <EmptyState
             title="Challenge not found"
-            description="It may have been unpublished or archived by the organization."
-            actionLabel="Back to challenges"
+            description="It may have been unpublished or archived. The catalog shows everything currently live."
+            actionLabel="Back to the catalog"
             actionTo="/challenges"
           />
         </main>
@@ -71,7 +71,7 @@ export default function ChallengeDetail() {
     );
   }
 
-  const isStudent = user?.role === "student";
+  const isStudent = role === "student" || user?.role === "student";
   const profile = myProfile?.profile;
   const canJoin =
     isStudent &&
@@ -94,7 +94,7 @@ export default function ChallengeDetail() {
           onClick={() => navigate("/challenges")}
         >
           <ArrowLeft className="size-4" />
-          All challenges
+          Back to the catalog
         </Button>
 
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -107,7 +107,7 @@ export default function ChallengeDetail() {
                   {challenge.domain}
                 </Badge>
               </div>
-              <h1 className="text-2xl leading-tight font-bold tracking-tight sm:text-3xl">
+              <h1 className="text-2xl leading-tight font-semibold tracking-tight sm:text-3xl">
                 {challenge.title}
               </h1>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
@@ -141,7 +141,7 @@ export default function ChallengeDetail() {
             </header>
 
             <section className="space-y-2">
-              <h2 className="flex items-center gap-2 text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+              <h2 className="flex items-center gap-2 text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                 <Target className="size-4 text-primary" />
                 Problem statement
               </h2>
@@ -157,7 +157,7 @@ export default function ChallengeDetail() {
 
             {challenge.objectives.length > 0 && (
               <section className="space-y-2">
-                <h2 className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+                <h2 className="text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                   Objectives
                 </h2>
                 <ul className="space-y-1.5">
@@ -173,7 +173,7 @@ export default function ChallengeDetail() {
 
             {challenge.expectedOutcome && (
               <section className="space-y-2">
-                <h2 className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+                <h2 className="text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                   Expected outcome
                 </h2>
                 <p className="leading-7 text-muted-foreground">
@@ -184,7 +184,7 @@ export default function ChallengeDetail() {
 
             {challenge.constraints.length > 0 && (
               <section className="space-y-2">
-                <h2 className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+                <h2 className="text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                   Constraints
                 </h2>
                 <ul className="space-y-1.5">
@@ -199,7 +199,7 @@ export default function ChallengeDetail() {
             )}
 
             <section className="space-y-2">
-              <h2 className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+              <h2 className="text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                 Skills
               </h2>
               <div className="flex flex-wrap gap-1.5">
@@ -220,7 +220,7 @@ export default function ChallengeDetail() {
 
             {participants && participants.length > 0 && (
               <section className="space-y-3">
-                <h2 className="text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+                <h2 className="text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                   Recent participants
                 </h2>
                 <div className="flex flex-wrap gap-2">

@@ -181,12 +181,13 @@ export default function PostChallenge() {
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Post a Challenge
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          Publish a challenge
         </h1>
         <p className="mt-1.5 text-muted-foreground">
-          Describe the problem in your own words. Udbhava AI structures it into
-          sub-problems, skills and criteria — then you review, edit and publish.
+          Write the problem the way you'd explain it to a colleague. The
+          analyzer turns it into structure — sub-problems, skills, criteria —
+          and you stay in control of every field before it goes live.
         </p>
       </header>
 
@@ -239,7 +240,7 @@ export default function PostChallenge() {
               {analyzing ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Udbhava AI is analyzing…
+                  udbhava is analyzing…
                 </>
               ) : (
                 <>

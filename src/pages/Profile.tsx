@@ -16,7 +16,7 @@ export default function Profile() {
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Profile</h1>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Profile</h1>
         <p className="mt-1.5 text-muted-foreground">
           {user?.email ?? "Signed in user"} ·{" "}
           <span className="font-medium text-foreground">

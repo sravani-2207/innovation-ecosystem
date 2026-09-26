@@ -78,6 +78,7 @@ const schema = defineSchema(
       github: v.optional(v.string()),
       linkedin: v.optional(v.string()),
       onboarded: v.boolean(),
+      active: v.optional(v.boolean()),
     })
       .index("by_user", ["userId"])
       .index("by_role", ["role"]),

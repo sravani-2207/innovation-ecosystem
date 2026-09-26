@@ -13,18 +13,25 @@ import {
   Plus,
   Sparkles,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import { SkillBadge } from "@/components/badges";
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const role = user?.role;
+  const { user, role } = useAuth();
+
+  // Administrators land on their own console instead of a member dashboard.
+  if (role === "admin") return <AdminHome />;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-10">
       {role === "organization" ? <OrgDashboard /> : <StudentDashboard name={user?.name} />}
     </main>
   );
+}
+
+/** Redirect stub so admins always work inside /admin. */
+function AdminHome() {
+  return <Navigate to="/admin" replace />;
 }
 
 /* ------------------------------ Student ------------------------------ */
@@ -50,22 +57,22 @@ function StudentDashboard({ name }: { name?: string }) {
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm text-muted-foreground">Student dashboard</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+          <p className="text-sm text-muted-foreground">Member dashboard</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
             Welcome{getDisplay(name, "innovator")}
           </h1>
         </div>
         <Button onClick={() => navigate("/challenges")}>
           <Compass className="mr-2 size-4" />
-          Discover Challenges
+          Browse the catalog
         </Button>
       </header>
 
       {/* AI recommendations */}
       <section>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
           <Sparkles className="size-4 text-primary" />
-          AI recommendations
+          Picked for you
         </h2>
         {loading ? (
           <Card>
@@ -74,15 +81,15 @@ function StudentDashboard({ name }: { name?: string }) {
             </CardContent>
           </Card>
         ) : topRecs.length === 0 ? (
-          <AIPanel title="AI recommendations">
+          <AIPanel title="Picked for you">
             <p className="text-sm text-muted-foreground">
               {joinedCount > 0
-                ? "You're all caught up — every matching challenge is already joined."
-                : "Join your first challenge and Udbhava AI will personalize every recommendation after that."}
+                ? "You're all caught up — every challenge that fits your profile is already on your plate."
+                : "Once your profile is complete, the catalog ranks itself around your skills and interests."}
             </p>
           </AIPanel>
         ) : (
-          <AIPanel title={`Recommended for you · ${topRecs.length} strong matches`}>
+          <AIPanel title={`Strong matches · ${topRecs.length}`}>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {topRecs.map(({ challenge, match }) => (
                 <ChallengeCard key={challenge._id} challenge={challenge} match={match} />
@@ -94,16 +101,16 @@ function StudentDashboard({ name }: { name?: string }) {
 
       {/* Active challenges */}
       <section>
-        <h2 className="mb-3 text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
-          My active challenges
+        <h2 className="mb-3 text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+          Challenges you've joined
         </h2>
         {joined === undefined ? (
           <LoadingCards />
         ) : joined.length === 0 ? (
           <EmptyState
-            title="No challenges joined yet"
-            description="Discover a challenge that matches your skills and join to unlock team formation and AI mentoring."
-            actionLabel="Explore Challenges"
+            title="Nothing joined yet"
+            description="Browse the catalog and join a challenge that fits your skills — it becomes yours the moment you do."
+            actionLabel="Open the catalog"
             actionTo="/challenges"
           />
         ) : (
@@ -118,28 +125,28 @@ function StudentDashboard({ name }: { name?: string }) {
       {/* Progress strip */}
       {!loading && joinedCount > 0 && (
         <section>
-          <h2 className="mb-3 text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
-            Your innovation journey
+          <h2 className="mb-3 text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+            Your footprint
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard label="Challenges joined" value={String(joinedCount)} />
-            <StatCard label="Average AI match" value={`${avgMatch}%`} />
-            <StatCard label="Open challenges" value={String(challenges?.length ?? 0)} />
+            <StatCard label="Average match score" value={`${avgMatch}%`} />
+            <StatCard label="Open in the catalog" value={String(challenges?.length ?? 0)} />
           </div>
         </section>
       )}
 
       {/* Peer innovators */}
       <section>
-        <h2 className="mb-3 text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
-          Innovators on Udbhava
+        <h2 className="mb-3 text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+          Members with similar skills
         </h2>
         {peers === undefined ? (
           <LoadingCards />
         ) : peers.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            You're one of the first students here — invite your classmates to
-            build teams together.
+            You're one of the first members here — teammates will appear as
+            others join the workspace.
           </p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,10 +199,10 @@ function OrgDashboard() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Building2 className="size-4" /> Organization dashboard
+            <Building2 className="size-4" /> Organization workspace
           </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Your challenges
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+            Your published challenges
           </h1>
         </div>
         <Button onClick={() => navigate("/post-challenge")}>
@@ -216,7 +223,7 @@ function OrgDashboard() {
       </div>
 
       <section>
-        <h2 className="mb-3 text-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+        <h2 className="mb-3 text-sm font-semibold tracking-[0.08em] text-muted-foreground uppercase">
           My challenges
         </h2>
         {loading ? (
@@ -225,7 +232,7 @@ function OrgDashboard() {
           <EmptyState
             icon={<Building2 className="size-5" />}
             title="No challenges yet"
-            description="Publish your first real-world problem — Udbhava AI will structure it and match it to student innovators."
+            description="Publish your first problem — the analyzer structures it and the catalog starts matching it to the right members."
             actionLabel="Post a Challenge"
             actionTo="/post-challenge"
           />

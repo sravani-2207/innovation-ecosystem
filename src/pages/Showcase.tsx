@@ -33,16 +33,16 @@ export default function Showcase() {
         <header className="mb-8">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-accent/80 px-3 py-1 text-xs font-semibold text-accent-foreground">
             <Sparkles className="size-3.5" />
-            Public Innovation Showcase
+            Showcase
           </div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Solutions that made the journey
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            From emergence to existence
           </h1>
           <p className="mt-1.5 max-w-2xl text-muted-foreground">
-            When an organization approves a completed project, it is published
-            here so future innovators can learn from it. Version 1 collects the
-            first success stories — the full showcase pipeline (evaluation →
-            approval → publish) arrives in v2.
+            A record of problems the team has carried all the way through —
+            what they were, how they were approached, and what changed. Once
+            evaluation and approval land in version two, completed projects
+            will publish here automatically.
           </p>
         </header>
 
@@ -72,9 +72,9 @@ export default function Showcase() {
         <div className="mt-10">
           <EmptyState
             icon={<Rocket className="size-5" />}
-            title="Full showcase arriving in v2"
-            description="Once teams complete projects and organizations approve them for public visibility, every approved solution will appear here with problem, approach, team and impact."
-            actionLabel="Explore open challenges"
+            title="The first completed projects are on their way"
+            description="As soon as a project clears evaluation and is approved, its full record — problem, approach, team and impact — takes its place here."
+            actionLabel="Browse the catalog"
             actionTo="/challenges"
           />
         </div>

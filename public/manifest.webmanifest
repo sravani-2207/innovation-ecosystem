@@ -1,7 +1,7 @@
 {
-  "name": "Udbhava",
-  "short_name": "Udbhava",
-  "description": "Where Problems Become Possibilities — connecting real-world challenges with student innovators.",
+  "name": "udbhava — from emergence to existence",
+  "short_name": "udbhava",
+  "description": "A private workspace where your team runs the full journey: challenges, participants and administration in one place.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFDF9",

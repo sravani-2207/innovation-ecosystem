@@ -64,7 +64,16 @@ const studentSchema = v.object({
   linkedin: v.optional(v.string()),
 });
 
-/** Create or update the signed-in organization's profile. */
+const adminSchema = v.object({
+  firstName: v.string(),
+  lastName: v.string(),
+});
+
+/**
+ * Create or update the signed-in organization's profile.
+ * Existing students cannot switch to an organization profile, and
+ * deactivating an account is respected everywhere.
+ */
 export const saveOrgProfile = mutation({
   args: orgSchema,
   handler: async (ctx, input) => {
@@ -91,6 +100,7 @@ export const saveOrgProfile = mutation({
       skills: [],
       interests: [],
       onboarded: true,
+      active: true,
     };
     const profileId = existing
       ? await ctx.db.patch(existing._id, data)
@@ -116,13 +126,18 @@ export const saveStudentProfile = mutation({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    const role =
-      existing?.role === ROLES.ADMIN ? existing.role : ROLES.STUDENT;
+    const role = existing?.role === ROLES.ADMIN ? existing.role : ROLES.STUDENT;
     if (existing && existing.role === ROLES.ORGANIZATION) {
       throw new Error("This account already has an organization profile.");
     }
 
-    const data = { ...input, userId, role, onboarded: true };
+    const data = {
+      ...input,
+      userId,
+      role,
+      onboarded: true,
+      active: true,
+    };
     const profileId = existing
       ? await ctx.db.patch(existing._id, data)
       : await ctx.db.insert("profiles", data);
@@ -134,7 +149,51 @@ export const saveStudentProfile = mutation({
   },
 });
 
-/** One-time role choice at onboarding for accounts without a profile yet. */
+/** Create or update the signed-in admin's minimal profile. */
+export const saveAdminProfile = mutation({
+  args: adminSchema,
+  handler: async (ctx, input) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    const existing = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    // Only brand-new accounts may take the admin role.
+    if (existing && existing.role !== ROLES.ADMIN) {
+      throw new Error("This account already has a different role.");
+    }
+
+    const data = {
+      userId,
+      role: ROLES.ADMIN,
+      firstName: input.firstName.trim(),
+      lastName: input.lastName.trim(),
+      skills: [],
+      interests: [],
+      onboarded: true,
+      active: true,
+    };
+    const profileId = existing
+      ? await ctx.db.patch(existing._id, data)
+      : await ctx.db.insert("profiles", data);
+    const fullName = `${input.firstName} ${input.lastName}`.trim();
+    if (user.name !== fullName) {
+      await ctx.db.patch(userId, { name: fullName });
+    }
+    return profileId;
+  },
+});
+
+/**
+ * One-time role choice at onboarding for accounts without a profile yet.
+ * Admin is only claimable while no profile exists (single-tenant trust model:
+ * the first person who sets up this private deployment takes the keys).
+ */
 export const setInitialRole = mutation({
   args: { role: roleValidator },
   handler: async (ctx, { role }) => {
@@ -151,6 +210,19 @@ export const setInitialRole = mutation({
       skills: [],
       interests: [],
       onboarded: false,
+      active: true,
     });
+  },
+});
+
+/** True once any admin profile exists (first-claim guard for the UI). */
+export const adminExists = query({
+  args: {},
+  handler: async (ctx) => {
+    const admins = await ctx.db
+      .query("profiles")
+      .withIndex("by_role", (q) => q.eq("role", ROLES.ADMIN))
+      .first();
+    return admins !== null;
   },
 });

@@ -142,17 +142,17 @@
 }
 
 @layer utilities {
-  /* Warm sunburst for the hero — used sparingly. */
+  /* Warm sunburst for the hero — kept faint for a calm, premium feel. */
   .hero-warm {
     background:
       radial-gradient(
         58rem 30rem at 82% -12%,
-        color-mix(in srgb, var(--primary) 14%, transparent),
+        color-mix(in srgb, var(--primary) 9%, transparent),
         transparent 62%
       ),
       radial-gradient(
         40rem 22rem at 8% 8%,
-        color-mix(in srgb, var(--chart-5) 9%, transparent),
+        color-mix(in srgb, var(--chart-5) 6%, transparent),
         transparent 58%
       );
   }
@@ -160,35 +160,35 @@
     background:
       radial-gradient(
         58rem 30rem at 82% -12%,
-        color-mix(in srgb, var(--primary) 22%, transparent),
+        color-mix(in srgb, var(--primary) 15%, transparent),
         transparent 62%
       ),
       radial-gradient(
         44rem 26rem at 6% 4%,
-        color-mix(in srgb, var(--chart-2) 26%, transparent),
+        color-mix(in srgb, var(--chart-2) 18%, transparent),
         transparent 60%
       );
   }
   .soft-shadow {
     box-shadow:
-      0 1px 2px rgb(58 36 24 / 0.05),
-      0 8px 24px -12px rgb(58 36 24 / 0.12);
+      0 1px 2px rgb(58 36 24 / 0.04),
+      0 8px 24px -14px rgb(58 36 24 / 0.1);
   }
   .dark .soft-shadow {
     box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.4),
-      0 8px 24px -12px rgb(0 0 0 / 0.55);
+      0 1px 2px rgb(0 0 0 / 0.35),
+      0 8px 24px -14px rgb(0 0 0 / 0.5);
   }
   .ai-glow {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 16%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 12%, transparent);
   }
   .animate-emerge {
-    animation: emerge 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: emerge 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   @keyframes emerge {
     from {
       opacity: 0;
-      transform: translateY(14px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;

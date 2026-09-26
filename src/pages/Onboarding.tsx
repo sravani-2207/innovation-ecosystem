@@ -20,13 +20,18 @@ import {
   SKILLS,
   YEARS,
 } from "@/lib/constants";
-import { useMutation } from "convex/react";
-import { Building2, GraduationCap, Loader2 } from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
+import {
+  Building2,
+  GraduationCap,
+  Loader2,
+  ShieldCheck,
+} from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
-type RoleChoice = "student" | "organization";
+type RoleChoice = "student" | "organization" | "admin";
 
 export default function Onboarding() {
   const { user } = useAuth();
@@ -34,6 +39,7 @@ export default function Onboarding() {
   const [searchParams] = useSearchParams();
   const [role, setRole] = useState<RoleChoice | null>(null);
   const [saving, setSaving] = useState(false);
+  const adminAvailable = useQuery(api.profiles.adminExists, {}) === false;
 
   const preselected = searchParams.get("role") as RoleChoice | null;
   const chosen: RoleChoice | null = role ?? preselected;
@@ -44,9 +50,11 @@ export default function Onboarding() {
         <div className="mb-8 flex items-center gap-3">
           <UdbhavaMark className="size-10" />
           <div>
-            <p className="text-[15px] font-bold tracking-[0.14em]">UDBHAVA</p>
+            <p className="text-[15px] font-semibold lowercase tracking-[0.2em]">
+              udbhava
+            </p>
             <p className="text-xs text-muted-foreground">
-              Step 2 of 2 — tell us who you are
+              One step left — tell the workspace who you are
             </p>
           </div>
         </div>
@@ -54,26 +62,36 @@ export default function Onboarding() {
         {!chosen ? (
           <Card className="soft-shadow border-border/80">
             <CardHeader>
-              <CardTitle>How will you use Udbhava?</CardTitle>
+              <CardTitle>Choose your role</CardTitle>
               <CardDescription>
-                This shapes your dashboard, permissions and AI matching.
+                This decides your dashboard, your permissions and how udbhava
+                works for you.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2">
+            <CardContent className="grid gap-3 sm:grid-cols-3">
               <RoleCard
                 icon={<GraduationCap className="size-5" />}
                 title="Student"
-                body="Discover challenges matched to your skills, build teams and develop real solutions."
+                body="Find challenges matched to your skills and work them to completion."
                 selected={false}
                 onClick={() => setRole("student")}
               />
               <RoleCard
                 icon={<Building2 className="size-5" />}
                 title="Organization"
-                body="Publish real-world challenges, review teams and evaluate solutions."
+                body="Publish problems, follow participation and review what comes back."
                 selected={false}
                 onClick={() => setRole("organization")}
               />
+              {adminAvailable && (
+                <RoleCard
+                  icon={<ShieldCheck className="size-5" />}
+                  title="Administrator"
+                  body="Run the workspace: members, challenges and everything between."
+                  selected={false}
+                  onClick={() => setRole("admin")}
+                />
+              )}
             </CardContent>
           </Card>
         ) : chosen === "student" ? (
@@ -83,11 +101,17 @@ export default function Onboarding() {
             setSaving={setSaving}
             onDone={() => navigate("/dashboard")}
           />
-        ) : (
+        ) : chosen === "organization" ? (
           <OrgForm
             saving={saving}
             setSaving={setSaving}
             onDone={() => navigate("/dashboard")}
+          />
+        ) : (
+          <AdminForm
+            saving={saving}
+            setSaving={setSaving}
+            onDone={() => navigate("/admin")}
           />
         )}
       </div>
@@ -172,7 +196,7 @@ function StudentForm({
         experienceLevel: experienceLevel || undefined,
         availability: availability || undefined,
       });
-      toast.success("Profile saved — welcome to Udbhava!");
+      toast.success("Profile saved — welcome to udbhava.");
       onDone();
     } catch (err) {
       toast.error(
@@ -190,7 +214,7 @@ function StudentForm({
           <CardTitle>Student profile</CardTitle>
           <CardDescription>
             {defaultEmail && `Signed in as ${defaultEmail} · `}
-            Udbhava AI uses this to rank challenges and suggest teammates.
+            The workspace uses this to rank challenges and surface the right teammates.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -367,5 +391,71 @@ function Field({
       {children}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
+  );
+}
+
+function AdminForm({
+  saving,
+  setSaving,
+  onDone,
+}: {
+  saving: boolean;
+  setSaving: (v: boolean) => void;
+  onDone: () => void;
+}) {
+  const save = useMutation(api.profiles.saveAdminProfile);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstName.trim() || !lastName.trim()) {
+      toast.error("Please provide your full name.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await save({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
+      toast.success("Administrator profile created.");
+      onDone();
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not save your profile.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit}>
+      <Card className="soft-shadow border-border/80">
+        <CardHeader>
+          <CardTitle>Administrator profile</CardTitle>
+          <CardDescription>
+            You will manage members, challenges and workspace settings.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="First name">
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+            </Field>
+            <Field label="Last name">
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+            </Field>
+          </div>
+        </CardContent>
+      </Card>
+      <div className="mt-5 flex justify-end">
+        <Button type="submit" size="lg" disabled={saving}>
+          {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
+          Create admin profile
+        </Button>
+      </div>
+    </form>
   );
 }

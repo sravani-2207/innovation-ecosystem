@@ -1,6 +1,9 @@
 import '@vly-ai/integrations';
 import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "@/components/RequireAuth";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
@@ -20,6 +23,9 @@ const DashboardLayout = lazy(() => import("./pages/DashboardLayout.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
 const PostChallenge = lazy(() => import("./pages/PostChallenge.tsx"));
 const Profile = lazy(() => import("./pages/Profile.tsx"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard.tsx"));
+const AdminUsers = lazy(() => import("./pages/AdminUsers.tsx"));
+const AdminChallenges = lazy(() => import("./pages/AdminChallenges.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -120,6 +126,33 @@ function dashboard(children: React.ReactNode) {
   );
 }
 
+/** Route guard: only workspace administrators may render admin pages. */
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const { isLoading, role } = useAuth();
+  if (isLoading) return <RouteLoading />;
+  if (role !== "admin") {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Administrators only</CardTitle>
+            <CardDescription>
+              This area is reserved for workspace administration. Your account
+              does not have access.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Button variant="outline" onClick={() => window.history.back()}>
+              Go back
+            </Button>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
+  return <DashboardLayout>{children}</DashboardLayout>;
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RootErrorBoundary>
@@ -150,6 +183,30 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/dashboard" element={dashboard(<Dashboard />)} />
               <Route path="/post-challenge" element={dashboard(<PostChallenge />)} />
               <Route path="/profile" element={dashboard(<Profile />)} />
+              <Route
+                path="/admin"
+                element={
+                  <RequireAdmin>
+                    <AdminDashboard />
+                  </RequireAdmin>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <RequireAdmin>
+                    <AdminUsers />
+                  </RequireAdmin>
+                }
+              />
+              <Route
+                path="/admin/challenges"
+                element={
+                  <RequireAdmin>
+                    <AdminChallenges />
+                  </RequireAdmin>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

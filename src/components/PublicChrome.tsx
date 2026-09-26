@@ -6,20 +6,27 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 const LINKS = [
-  { to: "/challenges", label: "Challenges" },
+  { to: "/challenges", label: "Catalog" },
   { to: "/showcase", label: "Showcase" },
   { to: "/#how", label: "How it works" },
 ];
 
 export function PublicNav() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  const dashboardLabel =
+    user?.role === "organization"
+      ? "Organization dashboard"
+      : user?.role === "admin"
+        ? "Admin"
+        : "Dashboard";
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-        <UdbhavaLogo subtitle="Where Problems Become Possibilities" />
+        <UdbhavaLogo />
         <nav className="hidden items-center gap-6 md:flex">
           {LINKS.map((l) => (
             <Link
@@ -33,14 +40,14 @@ export function PublicNav() {
         </nav>
         <div className="hidden items-center gap-2 md:flex">
           {!isLoading && isAuthenticated ? (
-            <Button onClick={() => navigate("/dashboard")}>Open dashboard</Button>
+            <Button onClick={() => navigate("/dashboard")}>{dashboardLabel}</Button>
           ) : (
             <>
               <Button variant="ghost" onClick={() => navigate("/auth")}>
                 Log in
               </Button>
               <Button onClick={() => navigate("/auth?mode=register")}>
-                Get started
+                Create account
               </Button>
             </>
           )}
@@ -70,7 +77,7 @@ export function PublicNav() {
             <div className="mt-2 flex gap-2">
               {!isLoading && isAuthenticated ? (
                 <Button className="flex-1" onClick={() => navigate("/dashboard")}>
-                  Open dashboard
+                  {dashboardLabel}
                 </Button>
               ) : (
                 <>
@@ -85,7 +92,7 @@ export function PublicNav() {
                     className="flex-1"
                     onClick={() => navigate("/auth?mode=register")}
                   >
-                    Get started
+                    Create account
                   </Button>
                 </>
               )}
@@ -98,13 +105,11 @@ export function PublicNav() {
 }
 
 const FOOTER_LINKS: { label: string; to: string }[] = [
-  { label: "About", to: "/#how" },
-  { label: "Challenges", to: "/challenges" },
+  { label: "How it works", to: "/#how" },
+  { label: "Catalog", to: "/challenges" },
   { label: "Showcase", to: "/showcase" },
-  { label: "Login", to: "/auth" },
-  { label: "Register", to: "/auth?mode=register" },
-  { label: "Privacy", to: "/privacy" },
-  { label: "Terms", to: "/terms" },
+  { label: "Log in", to: "/auth" },
+  { label: "Create account", to: "/auth?mode=register" },
 ];
 
 export function PublicFooter() {
@@ -115,12 +120,11 @@ export function PublicFooter() {
           <div className="max-w-sm">
             <UdbhavaLogo />
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              An innovation ecosystem connecting universities, industry and
-              student innovators — from real-world challenges to student-driven
-              solutions.
+              A quiet, focused workspace for our team. Ideas begin as raw
+              problems here — and leave as tested, documented solutions.
             </p>
           </div>
-          <nav className="grid grid-cols-2 gap-x-10 gap-y-2 sm:grid-cols-3">
+          <nav className="grid grid-cols-2 gap-x-10 gap-y-2 sm:grid-cols-2">
             {FOOTER_LINKS.map((l) => (
               <Link
                 key={l.label}
@@ -133,8 +137,8 @@ export function PublicFooter() {
           </nav>
         </div>
         <div className="mt-8 flex flex-col gap-2 border-t border-border/70 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Udbhava. All rights reserved.</span>
-          <span>hello@udbhava.org</span>
+          <span>© {new Date().getFullYear()} udbhava. Internal use.</span>
+          <span>Used and maintained by our own team.</span>
         </div>
       </div>
     </footer>
