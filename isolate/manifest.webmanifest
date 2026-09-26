@@ -1,0 +1,17 @@
+{
+  "name": "udbhava — from emergence to existence",
+  "short_name": "udbhava",
+  "description": "A private workspace where your team runs the full journey: challenges, participants and administration in one place.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFDF9",
+  "theme_color": "#C65A1E",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
