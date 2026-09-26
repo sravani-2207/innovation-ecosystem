@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { TagEditor } from "@/components/TagEditor";
+import { FileUploadPortal, type AttachedFile } from "@/components/FileUploadPortal";
 import { AIAnalysisLoading, AIAnalysisResult } from "@/components/AIIdeaAnalysis";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -23,12 +24,9 @@ import {
   ArrowLeft,
   BrainCircuit,
   CheckCircle2,
-  FileUp,
   Loader2,
-  Paperclip,
-  Trash2,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
@@ -51,17 +49,24 @@ export default function SubmitIdea() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [technologies, setTechnologies] = useState<string[]>([]);
-  const [file, setFile] = useState<{ name: string; type: string } | null>(null);
+  const [file, setFile] = useState<AttachedFile | null>(null);
   const [analysis, setAnalysis] = useState<IdeaAnalysis | null>(null);
   const [ideaId, setIdeaId] = useState<Id<"ideas"> | null>(null);
   const [saving, setSaving] = useState(false);
-  const fileInput = useRef<HTMLInputElement>(null);
+  const attachFile = useMutation(api.ideas.attachFile);
 
   // Prefill from an existing submission if present.
   if (existing && stage === "form" && !title) {
     setTitle(existing.title);
     setDescription(existing.description);
     setTechnologies(existing.technologies);
+    if (existing.fileName) {
+      setFile({
+        fileName: existing.fileName,
+        fileType: existing.fileType,
+        fileStorageId: existing.fileStorageId,
+      });
+    }
   }
 
   const canAnalyze =
@@ -69,14 +74,23 @@ export default function SubmitIdea() {
     description.trim().length > 30 &&
     technologies.length > 0;
 
-  const handleFile = (f: File | null) => {
-    if (!f) return;
-    if (f.size > 5 * 1024 * 1024) {
-      toast.error("Please attach a file under 5 MB for the prototype.");
-      return;
+  // Persist attachment changes for an already-created idea.
+  const syncAttachment = async (next: AttachedFile | null) => {
+    setFile(next);
+    const id = ideaId ?? existing?._id;
+    if (!id) return;
+    try {
+      await attachFile({
+        ideaId: id,
+        fileName: next?.fileName,
+        fileType: next?.fileType,
+        fileStorageId: next?.fileStorageId ?? null,
+      });
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not update the attachment.",
+      );
     }
-    setFile({ name: f.name, type: f.type || "file" });
-    toast.success(`Attached “${f.name}”.`);
   };
 
   const analyze = async () => {
@@ -100,8 +114,9 @@ export default function SubmitIdea() {
           title: title.trim(),
           description: description.trim(),
           technologies,
-          fileName: file?.name,
-          fileType: file?.type,
+          fileName: file?.fileName,
+          fileType: file?.fileType,
+          fileStorageId: file?.fileStorageId,
         });
         setIdeaId(id);
       }
@@ -233,38 +248,11 @@ export default function SubmitIdea() {
               />
               <div className="space-y-1.5">
                 <Label>Sample file or image (optional)</Label>
-                {file ? (
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-3 py-2.5">
-                    <span className="flex min-w-0 items-center gap-2 text-sm">
-                      <Paperclip className="size-4 shrink-0 text-muted-foreground" />
-                      <span className="truncate">{file.name}</span>
-                    </span>
-                    <button
-                      type="button"
-                      aria-label="Remove attachment"
-                      className="rounded-md p-1 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
-                      onClick={() => setFile(null)}
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInput.current?.click()}
-                    className="flex w-full flex-col items-center gap-1.5 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-6 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-                  >
-                    <FileUp className="size-5" />
-                    Click to attach a sketch, dataset sample or document (max 5 MB)
-                  </button>
-                )}
-                <input
-                  ref={fileInput}
-                  type="file"
-                  className="hidden"
-                  accept="image/*,.pdf,.doc,.docx,.csv,.xlsx,.ppt,.pptx,.txt"
-                  onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-                />
+                <FileUploadPortal value={file} onChange={syncAttachment} />
+                <p className="text-xs text-muted-foreground">
+                  Uploaded files are stored in the workspace and become visible
+                  to the organization reviewing your idea.
+                </p>
               </div>
             </CardContent>
           </Card>

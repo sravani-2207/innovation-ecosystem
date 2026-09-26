@@ -130,6 +130,7 @@ const schema = defineSchema(
       technologies: v.array(v.string()),
       fileName: v.optional(v.string()),
       fileType: v.optional(v.string()),
+      fileStorageId: v.optional(v.id("_storage")),
       analysis: v.optional(
         v.object({
           problemUnderstanding: v.string(),

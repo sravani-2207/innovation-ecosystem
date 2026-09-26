@@ -16,9 +16,12 @@ import { EmptyState } from "@/components/states";
 import { AIAnalysisResult } from "@/components/AIIdeaAnalysis";
 import { SkillBadge } from "@/components/badges";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "convex/react";
 import {
   BrainCircuit,
+  ExternalLink,
   FileText,
   GraduationCap,
   Lightbulb,
@@ -28,8 +31,17 @@ import {
 import { Link } from "react-router";
 
 export default function OrgIdeas() {
-  const rows = useQuery(api.ideas.listForOrg, {});
+  const { isAuthenticated } = useAuth();
+  const rows = useQuery(api.ideas.listForOrg, isAuthenticated ? {} : "skip");
   const loading = rows === undefined;
+  const fileUrl = useQuery(
+    api.files.getFileUrl,
+    // Pre-fetch the first attachment URL for quick preview (prototype scope:
+    // one attachment per idea).
+    rows && rows[0]?.idea.fileStorageId
+      ? { storageId: rows[0].idea.fileStorageId }
+      : "skip",
+  );
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-10">
@@ -114,10 +126,24 @@ export default function OrgIdeas() {
                 </div>
 
                 {idea.fileName && (
-                  <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
-                    <Paperclip className="size-3.5 text-muted-foreground" />
-                    <span className="truncate">{idea.fileName}</span>
-                    <FileText className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
+                  <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <Paperclip className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{idea.fileName}</span>
+                    </span>
+                    {idea.fileStorageId ? (
+                      <a
+                        href={fileUrl ?? "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      >
+                        Open attachment
+                        <ExternalLink className="size-3" />
+                      </a>
+                    ) : (
+                      <FileText className="size-3.5 shrink-0 text-muted-foreground" />
+                    )}
                   </div>
                 )}
 

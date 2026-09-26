@@ -23,9 +23,11 @@ function formatDate(ts?: number) {
 export function ChallengeCard({
   challenge,
   match,
+  joined,
 }: {
   challenge: Challenge;
   match?: Match;
+  joined?: boolean;
 }) {
   const deadline = formatDate(challenge.deadline);
   return (
@@ -36,7 +38,16 @@ export function ChallengeCard({
       <Card className="soft-shadow h-full gap-3 border-border/80 bg-card py-5 transition-all group-hover:-translate-y-0.5 group-hover:border-primary/40">
         <CardHeader className="space-y-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            <ChallengeStatus status={challenge.status} />
+            {joined ? (
+              <Badge
+                variant="outline"
+                className="border-success/30 bg-success/10 font-medium text-success"
+              >
+                Joined
+              </Badge>
+            ) : (
+              <ChallengeStatus status={challenge.status} />
+            )}
             <DifficultyBadge level={challenge.difficulty} />
           </div>
           <h3 className="line-clamp-2 text-[15px] leading-snug font-semibold text-foreground group-hover:text-primary">

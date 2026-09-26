@@ -16,8 +16,12 @@ export const create = mutation({
     technologies: v.array(v.string()),
     fileName: v.optional(v.string()),
     fileType: v.optional(v.string()),
+    fileStorageId: v.optional(v.id("_storage")),
   },
-  handler: async (ctx, { challengeId, title, description, technologies, fileName, fileType }) => {
+  handler: async (
+    ctx,
+    { challengeId, title, description, technologies, fileName, fileType, fileStorageId },
+  ) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
     const profile = await ctx.db
@@ -47,6 +51,42 @@ export const create = mutation({
       technologies,
       fileName,
       fileType,
+      fileStorageId,
+    });
+  },
+});
+
+/**
+ * Attach (or replace) an uploaded file on an existing idea.
+ * Pass fileStorageId: null to detach.
+ */
+export const attachFile = mutation({
+  args: {
+    ideaId: v.id("ideas"),
+    fileName: v.optional(v.string()),
+    fileType: v.optional(v.string()),
+    fileStorageId: v.optional(v.union(v.id("_storage"), v.null())),
+  },
+  handler: async (ctx, { ideaId, fileName, fileType, fileStorageId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const idea = await ctx.db.get(ideaId);
+    if (!idea) throw new Error("Idea not found");
+    if (idea.studentUserId !== userId) throw new Error("Not your idea");
+
+    // Replace: delete the previous stored file so storage stays clean.
+    if (
+      idea.fileStorageId &&
+      fileStorageId !== undefined &&
+      idea.fileStorageId !== fileStorageId
+    ) {
+      await ctx.storage.delete(idea.fileStorageId);
+    }
+
+    await ctx.db.patch(ideaId, {
+      fileName: fileName ?? (fileStorageId === null ? undefined : idea.fileName),
+      fileType: fileType ?? (fileStorageId === null ? undefined : idea.fileType),
+      fileStorageId: fileStorageId === null ? undefined : fileStorageId ?? idea.fileStorageId,
     });
   },
 });

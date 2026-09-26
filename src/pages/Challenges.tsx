@@ -47,6 +47,11 @@ export default function Challenges() {
   const { user, role, isAuthenticated } = useAuth();
   const challenges = useChallenges();
   const recommended = useRecommended();
+  const joinedRows = useQuery(
+    api.challenges.listJoined,
+    isAuthenticated ? {} : "skip",
+  );
+  const joinedIds = new Set((joinedRows ?? []).map((r) => r.challenge._id));
 
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState("all");
@@ -117,7 +122,12 @@ export default function Challenges() {
               <AIPanel title="Picked for you" className="mb-6">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {recommended.slice(0, 3).map(({ challenge, match }) => (
-                    <ChallengeCard key={challenge._id} challenge={challenge} match={match} />
+                    <ChallengeCard
+                      key={challenge._id}
+                      challenge={challenge}
+                      match={match}
+                      joined={joinedIds.has(challenge._id)}
+                    />
                   ))}
                 </div>
               </AIPanel>
@@ -180,7 +190,11 @@ export default function Challenges() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((c) => (
-              <ChallengeCard key={c._id} challenge={c} />
+              <ChallengeCard
+                key={c._id}
+                challenge={c}
+                joined={joinedIds.has(c._id)}
+              />
             ))}
           </div>
         )}

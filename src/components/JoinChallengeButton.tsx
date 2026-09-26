@@ -42,8 +42,8 @@ export function JoinChallengeButton({
     try {
       await join({ id: challengeId });
       setConfirmOpen(false);
-      toast.success("You joined this challenge!", {
-        description: "Team formation and your workspace are unlocked.",
+      toast.success("You joined this challenge", {
+        description: "Idea submission is now unlocked — open the challenge to continue.",
       });
     } catch (err) {
       toast.error(
@@ -130,8 +130,9 @@ export function JoinChallengeButton({
           <DialogHeader>
             <DialogTitle>Join this challenge?</DialogTitle>
             <DialogDescription>
-              Joining unlocks team formation, idea submission and the AI
-              Innovation Mentor for this challenge.
+              Joining marks this challenge as yours and unlocks idea submission
+              with AI analysis. You can leave any time before team formation
+              starts.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
